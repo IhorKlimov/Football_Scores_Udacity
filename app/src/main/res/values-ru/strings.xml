@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about">О приложении</string>
+    <string name="about_text">Это приложение получить результат футбольных матчей для Премьер-лиги, Серия А, Бундеслига, Примера Дивизион и Лиги чемпионов УЕФА. Все матчи данные получены из football-data.org свободного API. Все команды Логос получают из http://hdlogo.wordpress.com/ на запрос формы разрешения владельца. Оригинальная версия этого приложения была создана Яхья ибн Халид Эль-Валид Ахмед, и измененная версия отдается студентам в программе Udacity Android-Nanodegree. Чтобы сообщить какие-либо ошибки, или предложения, не стесняйтесь, чтобы отправить письмо на y.k.ibnelwalid@gmail.com. Во время межсезонья, поддельные данные будут добавлены в приложение.</string>
+    <string name="action_settings">Настройки</string>
+    <string name="away_team_crest_desc">Символ соперника</string>
+    <string name="backdrop_desc">Футбольные мячи</string>
+    <string name="bundesliga1">Бундеслига 1</string>
+    <string name="bundesliga2">Бундеслига 2</string>
+    <string name="champions_league">Лига чемпионов УЕФА</string>
+    <string name="final_text">Финал</string>
+    <string name="first_knockout_round">Первый раунде нокаутом</string>
+    <string name="home_team_crest_desc">Символ домашней команды</string>
+    <string name="match_day_6">Группа Этапы, Матч: 6</string>
+    <string name="matchday_text">День матча : %s</string>
+    <string name="not_known_league">Неизвестная лига, пожалуста сообщите</string>
+    <string name="premierleague">Премьер Лига</string>
+    <string name="primeradivison">Чемпионат</string>
+    <string name="quarter_final">Заключительная четверть</string>
+    <string name="semi_final">Полуфинал</string>
+    <string name="seriaa">Серия А</string>
+    <string name="share_text">Поделиться</string>
+    <string name="share_the_play_desc">Поделиться результатом</string>
+    <string name="today">Сегодня</string>
+    <string name="tomorrow">Завтра</string>
+    <string name="test_text">Тест</string>
+    <string name="yesterday">Вчера</string>
+    <string name="widget_text">Это виджет</string>
+</resources>

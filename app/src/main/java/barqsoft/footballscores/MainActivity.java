@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.facebook.stetho.Stetho;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Stetho.initializeWithDefaults(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -67,8 +70,6 @@ public class MainActivity extends AppCompatActivity {
         TabLayout tab = (TabLayout) findViewById(R.id.tab);
         tab.setupWithViewPager(mPager);
 
-//        PagerTabStrip header = (PagerTabStrip) findViewById(R.id.pager_header);
-//        header.setGravity(CENTER);
     }
 
     @Override
@@ -99,6 +100,5 @@ public class MainActivity extends AppCompatActivity {
         sCurrentFragment = mPager.getCurrentItem();
         super.onSaveInstanceState(outState);
     }
-
 
 }

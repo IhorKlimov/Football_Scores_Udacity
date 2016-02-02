@@ -3,14 +3,21 @@ package barqsoft.footballscores;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
+
+import java.util.ArrayList;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 /**
  * Created by yehya khaled on 2/26/2015.
@@ -25,83 +32,90 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
     public static final int COL_DATE = 1;
     public static final int COL_LEAGUE = 5;
     public static final int COL_MATCHDAY = 9;
+    public static final int COL_HOME_CREST = 10;
+    public static final int COL_AWAY_CREST = 11;
     public static final int COL_ID = 8;
     public static final int COL_MATCHTIME = 2;
 
     private Context mContext;
     private Cursor mCursor;
     public double detailMatchId = 0;
-    private String FOOTBALL_SCORES_HASHTAG = "#Football_Scores";
+    private ArrayList<Holder> mHolders = new ArrayList<>();
 
     public ScoresAdapter(Context context, Cursor cursor) {
         this.mContext = context;
         mCursor = cursor;
     }
 
-    public Intent createShareForecastIntent(String ShareText) {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, ShareText + FOOTBALL_SCORES_HASHTAG);
-        return shareIntent;
-    }
 
     @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
         View inflate = LayoutInflater.from(mContext)
                 .inflate(R.layout.scores_list_item, parent, false);
-        return new Holder(inflate,this);
+
+        Holder holder = new Holder(mContext, inflate, new Callback() {
+            @Override
+            public void OnItemClick(Holder holder) {
+                for (Holder h : mHolders) {
+                    h.detailContainer.setVisibility(GONE);
+                    h.shareButton.setOnClickListener(null);
+                }
+                detailMatchId = holder.match_id;
+                MainActivity.sSelectedMatchId = (int) holder.match_id;
+                holder.detailContainer.setVisibility(VISIBLE);
+                setupDetails(holder);
+            }
+        });
+
+        mHolders.add(holder);
+        return holder;
     }
 
     @Override
     public void onBindViewHolder(final Holder holder, int position) {
         if (!mCursor.moveToPosition(position)) return;
 
-        holder.home_name.setText(mCursor.getString(COL_HOME));
-        holder.away_name.setText(mCursor.getString(COL_AWAY));
+        holder.homeName.setText(mCursor.getString(COL_HOME));
+        holder.awayName.setText(mCursor.getString(COL_AWAY));
         holder.date.setText(mCursor.getString(COL_MATCHTIME));
-        holder.score.setText(Utility.getScores(mCursor.getInt(COL_HOME_GOALS), mCursor.getInt(COL_AWAY_GOALS)));
+        holder.score.setText(
+                Utility.getScores(mCursor.getInt(COL_HOME_GOALS), mCursor.getInt(COL_AWAY_GOALS)));
         holder.match_id = mCursor.getDouble(COL_ID);
-        holder.home_crest.setImageResource(Utility.getTeamCrestByTeamName(
+        holder.homeCrest.setImageResource(Utility.getTeamCrestByTeamName(
                 mCursor.getString(COL_HOME)));
-        holder.away_crest.setImageResource(Utility.getTeamCrestByTeamName(
+        holder.awayCrest.setImageResource(Utility.getTeamCrestByTeamName(
                 mCursor.getString(COL_AWAY)
         ));
+        holder.leagueData = Utility.getLeague(mContext, mCursor.getInt(COL_LEAGUE));
+        holder.matchDayData = Utility
+                .getMatchDay(mContext, mCursor.getInt(COL_MATCHDAY), mCursor.getInt(COL_LEAGUE));
 
-        //Log.v(FetchScoreTask.LOG_TAG,mHolder.home_name.getText() + " Vs. " + mHolder.away_name.getText() +" id " + String.valueOf(mHolder.match_id));
-        //Log.v(FetchScoreTask.LOG_TAG,String.valueOf(detailMatchId));
-        LayoutInflater vi = (LayoutInflater) mContext
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View v = vi.inflate(R.layout.detail_fragment, null);
+//        String s = mCursor.getString(COL_HOME_CREST);
+//        if (!s.equals("")) {
+//            Picasso.with(mContext).load(s).into(holder.homeCrest);
+//        }
+//        String a = mCursor.getString(COL_AWAY_CREST);
+//        if (!a.equals("")) {
+//            Picasso.with(mContext).load(a).into(holder.awayCrest);
+//        }
 
-//        ViewGroup container = (ViewGroup) view.findViewById(R.id.details_fragment_container);
         if (holder.match_id == detailMatchId) {
-            //Log.v(FetchScoreTask.LOG_TAG,"will insert extraView");
-
-            holder.container.addView(v, 0, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT
-                    , ViewGroup.LayoutParams.MATCH_PARENT));
-            TextView match_day = (TextView) v.findViewById(R.id.matchday_textview);
-            match_day.setText(Utility.getMatchDay(mCursor.getInt(COL_MATCHDAY),
-                    mCursor.getInt(COL_LEAGUE)));
-            TextView league = (TextView) v.findViewById(R.id.league_textview);
-            league.setText(Utility.getLeague(mCursor.getInt(COL_LEAGUE)));
-            Button shareButton = (Button) v.findViewById(R.id.share_button);
-            shareButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //add Share Action
-                    mContext.startActivity(createShareForecastIntent(holder.home_name.getText() + " "
-                            + holder.score.getText() + " " + holder.away_name.getText() + " "));
-                }
-            });
+            holder.detailContainer.setVisibility(VISIBLE);
+            setupDetails(holder);
         } else {
-            holder.container.removeAllViews();
+            holder.detailContainer.setVisibility(GONE);
         }
     }
 
     @Override
     public int getItemCount() {
         return mCursor == null ? 0 : mCursor.getCount();
+    }
+
+    private void setupDetails(final Holder holder) {
+        holder.matchDay.setText(holder.matchDayData);
+        holder.league.setText(holder.leagueData);
+        holder.shareButton.setOnClickListener(holder);
     }
 
     public void swapCursor(Cursor cursor) {

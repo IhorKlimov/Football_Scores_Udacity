@@ -1,47 +1,47 @@
 package barqsoft.footballscores;
 
+import android.content.Context;
+
+import barqsoft.footballscores.service.FetchService;
+
 /**
  * Created by yehya khaled on 3/3/2015.
  */
 public class Utility {
-    public static final int SERIE_A = 357;
-    public static final int PREMIER_LEGAUE = 354;
     public static final int CHAMPIONS_LEAGUE = 362;
-    public static final int PRIMERA_DIVISION = 358;
-    public static final int BUNDESLIGA = 351;
 
-    public static String getLeague(int league_num) {
+    public static String getLeague(Context context, int league_num) {
         switch (league_num) {
-            case SERIE_A:
-                return "Seria A";
-            case PREMIER_LEGAUE:
-                return "Premier League";
-            case CHAMPIONS_LEAGUE:
-                return "UEFA Champions League";
-            case PRIMERA_DIVISION:
-                return "Primera Division";
-            case BUNDESLIGA:
-                return "Bundesliga";
+            case FetchService.SERIE_A:
+                return context.getString(R.string.seriaa);
+            case FetchService.PREMIER_LEAGUE:
+                return context.getString(R.string.premierleague);
+            case FetchService.PRIMERA_DIVISION:
+                return context.getString(R.string.primeradivison);
+            case FetchService.BUNDESLIGA2:
+                return context.getString(R.string.bundesliga2);
+            case FetchService.BUNDESLIGA1:
+                return context.getString(R.string.bundesliga1);
             default:
-                return "Not known League Please report";
+                return context.getString(R.string.not_known_league);
         }
     }
 
-    public static String getMatchDay(int match_day, int league_num) {
+    public static String getMatchDay(Context context, int match_day, int league_num) {
         if (league_num == CHAMPIONS_LEAGUE) {
             if (match_day <= 6) {
-                return "Group Stages, Matchday : 6";
+                return context.getString(R.string.match_day_6);
             } else if (match_day == 7 || match_day == 8) {
-                return "First Knockout round";
+                return context.getString(R.string.first_knockout_round);
             } else if (match_day == 9 || match_day == 10) {
-                return "QuarterFinal";
+                return context.getString(R.string.quarter_final);
             } else if (match_day == 11 || match_day == 12) {
-                return "SemiFinal";
+                return context.getString(R.string.semi_final);
             } else {
-                return "Final";
+                return context.getString(R.string.final_text);
             }
         } else {
-            return "Matchday : " + String.valueOf(match_day);
+            return context.getString(R.string.matchday_text,String.valueOf(match_day)) ;
         }
     }
 
@@ -53,11 +53,11 @@ public class Utility {
         }
     }
 
-    public static int getTeamCrestByTeamName(String teamname) {
-        if (teamname == null) {
+    public static int getTeamCrestByTeamName(String teamName) {
+        if (teamName == null) {
             return R.drawable.no_icon;
         }
-        switch (teamname) {
+        switch (teamName) {
             //This is the set of icons that are currently in the app.
             // Feel free to find and add more as you go.
             case "Arsenal London FC":

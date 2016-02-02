@@ -3,7 +3,15 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="list_horizonal_matgin">2dp</dimen>
+    <!--Main-->
+    <dimen name="page_horizontal_padding">8dp</dimen>
+    <dimen name="card_padding">8dp</dimen>
+    <dimen name="backdrop_height">225dp</dimen>
+    <dimen name="tab_content_start">72dp</dimen>
+    <dimen name="card_top_margin">20dp</dimen>
+    <dimen name="crest_image_size">75dp</dimen>
+
+
     <dimen name="share_button_margin">150dp</dimen>
     <dimen name="TeamNames">17sp</dimen>
     <dimen name="Score">30sp</dimen>

@@ -100,6 +100,7 @@ public class PageAdapter extends FragmentStatePagerAdapter {
             c.set(DAY_OF_WEEK, n);
             res =  c.getDisplayName(DAY_OF_WEEK, LONG, Locale.getDefault());
         }
+
         return res.toUpperCase();
     }
 

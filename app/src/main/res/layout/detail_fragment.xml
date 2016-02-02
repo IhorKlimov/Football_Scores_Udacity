@@ -1,46 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
+    android:id="@+id/detail_container"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:visibility="gone">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="@dimen/card_top_margin">
+
         <TextView
+            android:id="@+id/league_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_weight="1"
+            android:gravity="center"
             android:text="@string/test_text"
             android:textColor="@android:color/black"
-            android:textSize="@dimen/League"
-            android:id="@+id/league_textview"/>
+            android:textSize="@dimen/League" />
+
         <TextView
+            android:id="@+id/matchday_textview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:layout_weight="1"
+            android:gravity="center"
             android:text="@string/test_text"
-            android:textSize="@dimen/League"
             android:textColor="@android:color/black"
-            android:id="@+id/matchday_textview"/>
+            android:textSize="@dimen/League" />
     </LinearLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp">
+        android:layout_marginTop="@dimen/card_top_margin">
+
         <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:text="@string/share_text"
-        android:id="@+id/share_button"
-        android:drawableLeft="@android:drawable/ic_menu_share"
-        android:paddingLeft="120dp"
-        android:paddingRight="120dp"/>
+            android:id="@+id/share_button"
+            android:layout_width="match_parent"
+            android:contentDescription="@string/share_the_play_desc"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:drawableLeft="@android:drawable/ic_menu_share"
+            android:drawableStart="@android:drawable/ic_menu_share"
+            android:gravity="center"
+            android:text="@string/share_text" />
     </FrameLayout>
 
 </LinearLayout>
