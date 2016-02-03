@@ -40,6 +40,8 @@ public class ScoresProvider extends ContentProvider {
         return matcher;
     }
 
+
+
     private int match_uri(Uri uri) {
         String link = uri.toString();
 
@@ -148,7 +150,7 @@ public class ScoresProvider extends ContentProvider {
                 } finally {
                     db.endTransaction();
                 }
-                getContext().getContentResolver().notifyChange(uri, null);
+                getContext().getContentResolver().notifyChange(uri, null, false);
                 return returncount;
             default:
                 return super.bulkInsert(uri, values);

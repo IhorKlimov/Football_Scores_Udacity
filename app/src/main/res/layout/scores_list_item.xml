@@ -91,7 +91,7 @@
             </LinearLayout>
         </LinearLayout>
 
-        <include layout="@layout/detail_fragment" />
+        <include layout="@layout/details" />
 
     </LinearLayout>
 </android.support.v7.widget.CardView>

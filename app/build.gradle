@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId "barqsoft.footballscores"
-        minSdkVersion 10
+        minSdkVersion 11
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -47,5 +47,4 @@ dependencies {
     androidTestCompile "com.android.support.test.espresso:espresso-core:${espressoVersion}"
     androidTestCompile "com.android.support.test:runner:0.4.1"
     androidTestCompile "com.android.support.test:rules:0.4.1"
-    compile 'com.google.android.gms:play-services-appindexing:8.1.0'
 }

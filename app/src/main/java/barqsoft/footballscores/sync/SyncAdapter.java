@@ -1,11 +1,40 @@
-package barqsoft.footballscores.service;
+/*
+ * Copyright (C) 2016 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import android.app.IntentService;
+package barqsoft.footballscores.sync;
+
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.content.AbstractThreadedSyncAdapter;
+import android.content.ContentProviderClient;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SyncRequest;
+import android.content.SyncResult;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -25,9 +54,13 @@ import java.util.TimeZone;
 import java.util.Vector;
 
 import barqsoft.footballscores.BuildConfig;
-import barqsoft.footballscores.data.DatabaseContract;
+import barqsoft.footballscores.MainActivity;
 import barqsoft.footballscores.R;
+import barqsoft.footballscores.data.DatabaseContract;
 
+import static barqsoft.footballscores.MainActivity.REFRESH_FINISHED;
+import static barqsoft.footballscores.PageAdapter.FULL_FORMAT;
+import static barqsoft.footballscores.PageAdapter.ONE_DAY_IN_MILLIS;
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.AWAY_COL;
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.AWAY_GOALS_COL;
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.DATE_COL;
@@ -36,14 +69,22 @@ import static barqsoft.footballscores.data.DatabaseContract.scores_table.HOME_GO
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.LEAGUE_COL;
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.MATCH_ID;
 import static barqsoft.footballscores.data.DatabaseContract.scores_table.TIME_COL;
-import static barqsoft.footballscores.PageAdapter.FULL_FORMAT;
-import static barqsoft.footballscores.PageAdapter.ONE_DAY_IN_MILLIS;
 
 /**
- * Created by yehya khaled on 3/2/2015.
+ * Handle the transfer of data between a server and an
+ * app, using the Android sync adapter framework.
  */
-public class FetchService extends IntentService {
-    public static final String LOG_TAG = "FetchService";
+public class SyncAdapter extends AbstractThreadedSyncAdapter {
+    private static final String LOG_TAG = "SyncAdapter";
+    private static final String FROM_REFRESHER = "from refresher";
+    // Global variables
+    // Define a variable to contain a content resolver instance
+    ContentResolver mContentResolver;
+    Context mContext;
+
+    private static final int ONE_DAYS_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+    private static final int SYNC_INTERVAL = 24 * 60 * 60;
+    private static final int FLEX_TIME = SYNC_INTERVAL / 3;
 
     // This set of league codes is for the 2015/2016 season. In fall of 2016, they will need to
     // be updated. Feel free to use the codes
@@ -84,18 +125,145 @@ public class FetchService extends IntentService {
     private static final SimpleDateFormat NEW_DATE =
             new SimpleDateFormat("yyyy-MM-dd:HH:mm", Locale.getDefault());
 
+    // Constants
+    // The authority for the sync adapter's content provider
+    public static final String AUTHORITY = "barqsoft.footballscores";
+    // An account type, in the form of a domain name
+    public static final String ACCOUNT_TYPE = "example.com";
+    // The account name
+    public static final String ACCOUNT = "dummyaccount";
+    // Instance fields
+    Account mAccount;
 
-    public FetchService() {
-        super("FetchService");
+
+    /**
+     * Set up the sync adapter
+     */
+    public SyncAdapter(Context context, boolean autoInitialize) {
+        super(context, autoInitialize);
+        /*
+         * If your app uses a content resolver, get an instance of it
+         * from the incoming Context
+         */
+        mContentResolver = context.getContentResolver();
+        mContext = context;
+    }
+
+    /**
+     * Set up the sync adapter. This form of the
+     * constructor maintains compatibility with Android 3.0
+     * and later platform versions
+     */
+    public SyncAdapter(Context context, boolean autoInitialize, boolean allowParallelSyncs) {
+        super(context, autoInitialize, allowParallelSyncs);
+        /*
+         * If your app uses a content resolver, get an instance of it
+         * from the incoming Context
+         */
+        mContentResolver = context.getContentResolver();
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        getData("n2");
-        getData("p2");
+    public void onPerformSync(Account account, Bundle extras, String authority,
+                              ContentProviderClient provider, SyncResult syncResult) {
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+//        long lastUpdate = prefs.getLong(
+//                mContext.getString(R.string.pref_last_update), System.currentTimeMillis());
+//        Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
+//        if (System.currentTimeMillis() - lastUpdate >= ONE_DAYS_IN_MILLISECONDS) {
+//            int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
+//            int delete2 = mContentResolver.delete(MovieByReleaseDate.CONTENT_URI, null, null);
+//            int delete3 = mContentResolver.delete(MovieByVotes.CONTENT_URI, null, null);
+//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete1);
+//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete2);
+//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
+//            prefs.edit().putLong(mContext.getString(R.string.last_update), System.currentTimeMillis()).apply();
+//            Utility.initializePagePreference(mContext);
+//            if (MoviesGridFragment.sListener != null) MoviesGridFragment.sListener.refresh();
+//            syncImmediately(mContext);
+//        } else {
+//            getData();
+//        }
+
+        boolean fromRefresher = extras.getBoolean(FROM_REFRESHER, false);
+
+        getData("n2", false);
+        getData("p2", fromRefresher);
     }
 
-    private void getData(String timeFrame) {
+    public static void syncImmediately(Context context) {
+        Log.d(LOG_TAG, "syncImmediately: ");
+//        ConnectivityManager systemService = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+//        NetworkInfo activeNetworkInfo = systemService.getActiveNetworkInfo();
+//        if (activeNetworkInfo == null) {
+//            new NoInternet().show(((MainActivity) context).getSupportFragmentManager(), "1");
+//        }
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
+        bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
+        bundle.putBoolean(FROM_REFRESHER, true);
+        ContentResolver.requestSync(
+                getSyncAccount(context), context.getString(R.string.authority), bundle);
+    }
+
+    public static void initializeSyncAdapter(Context context) {
+        getSyncAccount(context);
+    }
+
+    /**
+     * Create a new dummy account for the sync adapter
+     *
+     * @param context The application context
+     */
+    public static Account getSyncAccount(Context context) {
+        Account newAccount = new Account(
+                context.getString(R.string.app_name), context.getString(R.string.account_type));
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+
+        if (accountManager.getPassword(newAccount) == null) {
+            if (!accountManager.addAccountExplicitly(newAccount, "", null)) return null;
+
+            onAccountCreated(newAccount, context);
+        }
+
+        return newAccount;
+    }
+
+    private static void onAccountCreated(Account newAccount, Context context) {
+        Log.d(LOG_TAG, "CREATED NEW ACCOUNT");
+        SyncAdapter.configurePeriodicSync(context, SYNC_INTERVAL, FLEX_TIME);
+
+        ContentResolver.setSyncAutomatically(
+                newAccount, context.getString(R.string.authority), true);
+
+//        SharedPreferences preferences =
+//                PreferenceManager.getDefaultSharedPreferences(context);
+//        preferences.edit().putLong(
+//                context.getString(R.string.pref_last_update), System.currentTimeMillis())
+//                .apply();
+
+//        SyncAdapter.syncImmediately(context);
+    }
+
+    private static void configurePeriodicSync(
+            Context context, int syncInterval, int flexTime) {
+        String authority = context.getString(R.string.authority);
+        Account account = getSyncAccount(context);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // we can enable inexact timers in our periodic sync
+            SyncRequest request = new SyncRequest.Builder().
+                    syncPeriodic(syncInterval, flexTime).
+                    setSyncAdapter(account, authority).
+                    setExtras(new Bundle()).build();
+            ContentResolver.requestSync(request);
+        } else {
+            ContentResolver.addPeriodicSync(account, authority, new Bundle(), syncInterval);
+        }
+    }
+
+    private void getData(String timeFrame, boolean fromRefresher) {
+        Log.d(LOG_TAG, "getData: ");
         Uri uri = Uri.parse(BASE_URL).buildUpon().
                 appendQueryParameter(QUERY_TIME_FRAME, timeFrame).build();
 
@@ -109,10 +277,10 @@ public class FetchService extends IntentService {
                 if (matches.length() == 0) {
                     //if there is no data, call the function on dummy data
                     //this is expected behavior during the off season.
-                    processJsonData(getString(R.string.dummy_data),
-                            getApplicationContext(), false);
+                    processJsonData(
+                            mContext.getString(R.string.dummy_data), mContext, false, fromRefresher);
                 } else {
-                    processJsonData(jsonData, getApplicationContext(), true);
+                    processJsonData(jsonData, mContext, true, fromRefresher);
                 }
             } else {
                 Log.d(LOG_TAG, "Could not connect to server.");
@@ -162,7 +330,7 @@ public class FetchService extends IntentService {
         return result;
     }
 
-    private void processJsonData(String JSONdata, Context mContext, boolean isReal) {
+    private void processJsonData(String JSONdata, Context mContext, boolean isReal, boolean fromRefresher) {
         int league;
         String date;
         String time;
@@ -213,9 +381,9 @@ public class FetchService extends IntentService {
                 date = matchData.getString(MATCH_DATE);
                 time = date.substring(date.indexOf("T") + 1, date.indexOf("Z"));
                 date = date.substring(0, date.indexOf("T"));
-                FetchService.MATCH_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+                MATCH_DATE_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
                 try {
-                    Date parsedDate = FetchService.MATCH_DATE_FORMAT.parse(date + time);
+                    Date parsedDate = MATCH_DATE_FORMAT.parse(date + time);
                     NEW_DATE.setTimeZone(TimeZone.getDefault());
                     date = NEW_DATE.format(parsedDate);
                     time = date.substring(date.indexOf(":") + 1);
@@ -248,6 +416,10 @@ public class FetchService extends IntentService {
             values.toArray(insert_data);
             inserted_data = mContext.getContentResolver().bulkInsert(
                     DatabaseContract.BASE_CONTENT_URI, insert_data);
+
+            if (fromRefresher) {
+                notifyMainActivityRefreshFinished();
+            }
 
             //Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
         } catch (JSONException e) {
@@ -300,5 +472,12 @@ public class FetchService extends IntentService {
                 league == BUNDESLIGA2 ||
                 league == PRIMERA_DIVISION;
     }
-}
 
+    private void notifyMainActivityRefreshFinished() {
+        LocalBroadcastManager
+                .getInstance(mContext)
+                .sendBroadcast(
+                        new Intent(REFRESH_FINISHED));
+    }
+
+}

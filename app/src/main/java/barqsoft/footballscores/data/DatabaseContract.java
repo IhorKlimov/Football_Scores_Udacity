@@ -24,8 +24,6 @@ public class DatabaseContract {
         public static final String AWAY_GOALS_COL = "away_goals";
         public static final String MATCH_ID = "match_id";
         public static final String MATCH_DAY = "match_day";
-        public static final String HOME_CREST = "home_crest";
-        public static final String AWAY_CREST = "away_crest";
 
         //public static Uri SCORES_CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH)
         //.build();

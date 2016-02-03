@@ -1,39 +1,47 @@
 package barqsoft.footballscores;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.PagerTabStrip;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
 import com.facebook.stetho.Stetho;
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
-import static android.view.Gravity.CENTER;
+import barqsoft.footballscores.helpers.AppBarStateChangeListener;
+import barqsoft.footballscores.sync.SyncAdapter;
+
 import static android.view.View.VISIBLE;
 import static java.lang.String.valueOf;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements SwipeRefreshLayout.OnRefreshListener {
     public static final String LOG_TAG = "MainActivity";
+    public static final String REFRESH_FINISHED = "refresh finished";
 
     public static int sSelectedMatchId;
     public static int sCurrentFragment = 2;
 
     private ViewPager mPager;
+    private AppBarLayout mAppBar;
+    private AppBarStateChangeListener mAppBarListener;
+    private SwipeRefreshLayout mRefresher;
+    private LocalBroadcastManager mLocalBroadcastManager;
+    private BroadcastReceiver mRefreshFinishedReceiver;
 
 
     @Override
@@ -46,30 +54,31 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
-        final View scrim = findViewById(R.id.scrim);
-        Picasso.with(this)
-                .load("http://p1.pichost.me/i/63/1881032.jpg")
-                .into(backdrop, new Callback() {
-                    @Override
-                    public void onSuccess() {
-                        scrim.setVisibility(VISIBLE);
-                    }
+        loadBackdropImage();
 
-                    @Override
-                    public void onError() {
-
-                    }
-                });
-
-        mPager = (ViewPager) findViewById(R.id.pager);
-        PageAdapter adapter = new PageAdapter(this, getSupportFragmentManager());
-        mPager.setAdapter(adapter);
-        mPager.setCurrentItem(sCurrentFragment);
+        setupPager();
 
         TabLayout tab = (TabLayout) findViewById(R.id.tab);
         tab.setupWithViewPager(mPager);
 
+        setupRefresher();
+
+        setupRefreshFinishedReceiver();
+
+        SyncAdapter.initializeSyncAdapter(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mAppBar.removeOnOffsetChangedListener(mAppBarListener);
+        mRefresher.setOnRefreshListener(null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mLocalBroadcastManager.unregisterReceiver(mRefreshFinishedReceiver);
     }
 
     @Override
@@ -93,12 +102,77 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.v(LOG_TAG, "will save");
-        Log.v(LOG_TAG, "fragment: " + valueOf(mPager.getCurrentItem()));
-        Log.v(LOG_TAG, "selected id: " + sSelectedMatchId);
-
         sCurrentFragment = mPager.getCurrentItem();
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onRefresh() {
+        SyncAdapter.syncImmediately(this);
+    }
+
+    private void loadBackdropImage() {
+        ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
+        final View scrim = findViewById(R.id.scrim);
+        Picasso.with(this)
+                .load("http://p1.pichost.me/i/63/1881032.jpg")
+                .into(backdrop, new Callback() {
+                    @Override
+                    public void onSuccess() {
+                        scrim.setVisibility(VISIBLE);
+                    }
+
+                    @Override
+                    public void onError() {
+
+                    }
+                });
+    }
+
+    private void setupPager() {
+        mPager = (ViewPager) findViewById(R.id.pager);
+        PageAdapter adapter = new PageAdapter(this, getSupportFragmentManager());
+        mPager.setAdapter(adapter);
+        mPager.setCurrentItem(sCurrentFragment);
+    }
+
+    private void setupRefresher() {
+        mRefresher = (SwipeRefreshLayout) findViewById(R.id.refresher);
+        mRefresher.setOnRefreshListener(this);
+
+
+
+        mAppBarListener = new AppBarStateChangeListener() {
+            @Override
+            public void onStateChanged(AppBarLayout appBarLayout, @State int state) {
+                if (state == EXPANDED) {
+                    mRefresher.setEnabled(true);
+                } else {
+                    mRefresher.setEnabled(false);
+                }
+            }
+        };
+
+        mAppBar = (AppBarLayout) findViewById(R.id.app_bar);
+        mAppBar.addOnOffsetChangedListener(mAppBarListener);
+    }
+
+    private void setupRefreshFinishedReceiver() {
+        mRefreshFinishedReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction().equals(REFRESH_FINISHED)) {
+                    Log.d(LOG_TAG, "onReceive: Refresh finished");
+                    mRefresher.setRefreshing(false);
+                }
+            }
+        };
+
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
+
+        mLocalBroadcastManager
+                .registerReceiver(
+                        mRefreshFinishedReceiver, new IntentFilter(REFRESH_FINISHED));
     }
 
 }

@@ -9,7 +9,7 @@
     <dimen name="backdrop_height">225dp</dimen>
     <dimen name="tab_content_start">72dp</dimen>
     <dimen name="card_top_margin">20dp</dimen>
-    <dimen name="crest_image_size">75dp</dimen>
+    <dimen name="crest_image_size">50dp</dimen>
 
 
     <dimen name="share_button_margin">150dp</dimen>
