@@ -56,4 +56,53 @@
     <!--Preferences-->
     <string name="pref_last_update" translatable="false">Last update</string>
 
-</resources>    
+    <!--Crest Urls-->
+    <string name="Crystal_Palace_FC">http://upload.wikimedia.org/wikipedia/de/b/bf/Crystal_Palace_F.C._logo_(2013).png</string>
+    <string name="Everton_FC">http://upload.wikimedia.org/wikipedia/de/f/f9/Everton_FC.svg</string>
+    <string name="Stoke_City_FC">http://upload.wikimedia.org/wikipedia/de/a/a3/Stoke_City.svg</string>
+    <string name="one_FC_Union_Berlin">http://upload.wikimedia.org/wikipedia/de/e/e4/1._FC_Union_Berlin.svg</string>
+    <string name="West_Bromwich_Albion_FC">http://upload.wikimedia.org/wikipedia/de/8/8b/West_Bromwich_Albion.svg</string>
+    <string name="US_Sassuolo_Calcio">http://upload.wikimedia.org/wikipedia/de/a/a3/US_Sassuolo_Calcio.svg</string>
+    <string name="Genoa_CFC">http://upload.wikimedia.org/wikipedia/de/7/76/Genoa_CFC.svg</string>
+    <string name="Frosinone_Calcio">https://upload.wikimedia.org/wikipedia/it/c/c3/Frosinonestemma.png</string>
+    <string name="AC_Chievo_Verona">http://upload.wikimedia.org/wikipedia/de/3/3f/AC_Chievo_Verona.svg</string>
+    <string name="UC_Sampdoria">http://upload.wikimedia.org/wikipedia/de/c/cc/Sampdoria_Genua.svg</string>
+    <string name="Getafe_CF">http://upload.wikimedia.org/wikipedia/de/d/de/Getafe_CF.svg</string>
+    <string name="Bologna_FC">http://upload.wikimedia.org/wikipedia/de/9/92/FC_Bologna.svg</string>
+    <string name="Sunderland_AFC">http://upload.wikimedia.org/wikipedia/de/6/60/AFC_Sunderland.svg</string>
+    <string name="AFC_Bournemouth">https://upload.wikimedia.org/wikipedia/de/4/41/Afc_bournemouth.svg</string>
+    <string name="Werder_Bremen">http://upload.wikimedia.org/wikipedia/commons/b/be/SV-Werder-Bremen-Logo.svg</string>
+    <string name="Liverpool_FC">http://upload.wikimedia.org/wikipedia/de/0/0a/FC_Liverpool.svg</string>
+    <string name="SSC_Napoli">http://upload.wikimedia.org/wikipedia/commons/2/28/S.S.C._Napoli_logo.svg</string>
+    <string name="Swansea_City_FC">http://upload.wikimedia.org/wikipedia/de/a/ab/Swansea_City_Logo.svg</string>
+    <string name="one_FC_Kaiserslautern">http://upload.wikimedia.org/wikipedia/commons/d/d3/Logo_1_FC_Kaiserslautern.svg</string>
+    <string name="Málaga_CF">http://upload.wikimedia.org/wikipedia/de/e/e8/FC_Málaga.svg</string>
+    <string name="SV_Sandhausen">https://upload.wikimedia.org/wikipedia/commons/d/d3/SV_Sandhausen.svg</string>
+    <string name="FC_Internazionale_Milano">https://upload.wikimedia.org/wikipedia/it/7/7e/Logo_FC_Internazionale_Milano_2014.png</string>
+    <string name="Manchester_United_FC">http://upload.wikimedia.org/wikipedia/de/d/da/Manchester_United_FC.svg</string>
+    <string name="Watford_FC">https://upload.wikimedia.org/wikipedia/en/e/e2/Watford.svg</string>
+    <string name="Manchester_City_FC">http://upload.wikimedia.org/wikipedia/de/f/fd/ManCity.svg</string>
+    <string name="SS_Lazio">http://upload.wikimedia.org/wikipedia/de/thumb/4/47/Lazio_Rom.svg/500px-Lazio_Rom.svg.png</string>
+    <string name="Empoli_FC">http://upload.wikimedia.org/wikipedia/de/4/42/Logo_FC_Empoli.svg</string>
+    <string name="SC_Paderborn_07">https://upload.wikimedia.org/wikipedia/commons/e/e3/SC_Paderborn_07_Logo.svg</string>
+    <string name="Carpi_FC">https://upload.wikimedia.org/wikipedia/uk/0/0b/Carpi_FC_1909_logo.png</string>
+    <string name="VfL_Bochum">http://upload.wikimedia.org/wikipedia/de/4/43/Logo_VfL_Bochum.svg</string>
+    <string name="Tottenham_Hotspur_FC">http://upload.wikimedia.org/wikipedia/de/b/b4/Tottenham_Hotspur.svg</string>
+    <string name="Bor._Mönchengladbach">https://upload.wikimedia.org/wikipedia/commons/8/81/Borussia_Mönchengladbach_logo.svg</string>
+    <string name="Torino_FC">http://upload.wikimedia.org/wikipedia/de/2/2e/Torino_FC_Logo.svg</string>
+    <string name="AS_Roma">http://upload.wikimedia.org/wikipedia/de/3/32/AS_Rom.svg</string>
+    <string name="Leicester_City_FC">http://upload.wikimedia.org/wikipedia/en/6/63/Leicester02.png</string>
+    <string name="West_Ham_United_FC">http://upload.wikimedia.org/wikipedia/de/e/e0/West_Ham_United_FC.svg</string>
+    <string name="Juventus_Turin">http://upload.wikimedia.org/wikipedia/de/d/d2/Juventus_Turin.svg</string>
+    <string name="US_Cittá_di_Palermo">http://upload.wikimedia.org/wikipedia/de/7/7f/US_Palermo.svg</string>
+    <string name="Southampton_FC">http://upload.wikimedia.org/wikipedia/de/c/c9/FC_Southampton.svg</string>
+    <string name="Hellas_Verona_FC">http://upload.wikimedia.org/wikipedia/de/a/a2/Hellas_Verona_1903_FC.svg</string>
+    <string name="Chelsea_FC">http://upload.wikimedia.org/wikipedia/de/5/5c/Chelsea_crest.svg</string>
+    <string name="Atalanta_BC">http://upload.wikimedia.org/wikipedia/de/2/28/Atalanta_BC.svg</string>
+    <string name="Arsenal_FC">http://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg</string>
+    <string name="Udinese_Calcio">http://upload.wikimedia.org/wikipedia/de/b/b1/Udinese_Calcio.svg</string>
+    <string name="Aston_Villa_FC">http://upload.wikimedia.org/wikipedia/de/9/9f/Aston_Villa_logo.svg</string>
+    <string name="ACF_Fiorentina">http://upload.wikimedia.org/wikipedia/de/d/de/AC_Florenz.svg</string>
+    <string name="SC_Freiburg">http://upload.wikimedia.org/wikipedia/de/f/f1/SC-Freiburg_Logo-neu.svg</string>
+
+</resources>

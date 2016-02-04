@@ -28,14 +28,14 @@ import barqsoft.footballscores.BuildConfig;
 import barqsoft.footballscores.data.DatabaseContract;
 import barqsoft.footballscores.R;
 
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.AWAY_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.AWAY_GOALS_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.DATE_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.HOME_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.HOME_GOALS_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.LEAGUE_COL;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.MATCH_ID;
-import static barqsoft.footballscores.data.DatabaseContract.scores_table.TIME_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.AWAY_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.AWAY_GOALS_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.DATE_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.HOME_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.HOME_GOALS_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.LEAGUE_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.MATCH_ID;
+import static barqsoft.footballscores.data.DatabaseContract.Match.TIME_COL;
 import static barqsoft.footballscores.PageAdapter.FULL_FORMAT;
 import static barqsoft.footballscores.PageAdapter.ONE_DAY_IN_MILLIS;
 
@@ -284,7 +284,7 @@ public class FetchService extends IntentService {
         matchValues.put(LEAGUE_COL, league);
 //        matchValues.put(HOME_CREST, homeCrest);
 //        matchValues.put(AWAY_CREST, awayCrest);
-        matchValues.put(DatabaseContract.scores_table.MATCH_DAY, matchDay);
+        matchValues.put(DatabaseContract.Match.MATCH_DAY, matchDay);
 
         return matchValues;
     }

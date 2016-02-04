@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,11 +82,22 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
         holder.score.setText(
                 Utility.getScores(mCursor.getInt(COL_HOME_GOALS), mCursor.getInt(COL_AWAY_GOALS)));
         holder.match_id = mCursor.getDouble(COL_ID);
-        holder.homeCrest.setImageResource(Utility.getTeamCrestByTeamName(
-                mCursor.getString(COL_HOME)));
-        holder.awayCrest.setImageResource(Utility.getTeamCrestByTeamName(
-                mCursor.getString(COL_AWAY)
-        ));
+
+
+        String homeCrest = Utility.getTeamCrestByTeamName(mContext,mCursor.getString(COL_HOME));
+        if (!homeCrest.equals("")) {
+            Picasso.with(mContext).load(homeCrest).into(holder.homeCrest);
+        } else {
+            Picasso.with(mContext).load(R.drawable.no_icon).into(holder.homeCrest);
+        }
+
+        String awayCrest = Utility.getTeamCrestByTeamName(mContext,mCursor.getString(COL_AWAY));
+        if (!awayCrest.equals("")) {
+            Picasso.with(mContext).load(awayCrest).into(holder.awayCrest);
+        } else {
+            Picasso.with(mContext).load(R.drawable.no_icon).into(holder.awayCrest);
+        }
+
         holder.leagueData = Utility.getLeague(mContext, mCursor.getInt(COL_LEAGUE));
         holder.matchDayData = Utility
                 .getMatchDay(mContext, mCursor.getInt(COL_MATCHDAY), mCursor.getInt(COL_LEAGUE));
@@ -119,6 +131,7 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
     }
 
     public void swapCursor(Cursor cursor) {
+        Log.d(LOG_TAG, "swapCursor: ");
         mCursor = cursor;
         notifyDataSetChanged();
     }

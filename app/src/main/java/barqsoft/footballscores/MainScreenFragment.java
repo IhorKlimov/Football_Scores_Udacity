@@ -57,7 +57,7 @@ public class MainScreenFragment extends Fragment
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        return new CursorLoader(getActivity(), DatabaseContract.scores_table.buildScoreWithDate(),
+        return new CursorLoader(getActivity(), DatabaseContract.Match.CONTENT_URI,
                 null, null, fragmentDate, null);
     }
 

@@ -16,9 +16,13 @@
 
 package barqsoft.footballscores;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -29,6 +33,11 @@ import android.widget.TextView;
  * Created by Igor Klimov on 2/1/2016.
  */
 public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private static final String LOG_TAG = "Holder";
+
+    public static final String GOT_CREST_URL = "got_crest_url";
+    public static final String MESSAGE = "message";
+
     private Callback mCallback;
     private Context mContext;
     TextView homeName;
@@ -46,7 +55,6 @@ public class Holder extends RecyclerView.ViewHolder implements View.OnClickListe
 
     String matchDayData;
     String leagueData;
-
 
     public Holder(Context context, View view, Callback callback) {
         super(view);
