@@ -26,6 +26,8 @@ public class DatabaseContract {
         public static final String AWAY_GOALS_COL = "away_goals";
         public static final String MATCH_ID = "match_id";
         public static final String MATCH_DAY = "match_day";
+        public static final String HOME_TEAM_URL = "home_team_url";
+        public static final String AWAY_TEAM_URL = "away_team_url";
 
         //public static Uri SCORES_CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(MATCH_PATH)
         //.build();
@@ -41,6 +43,8 @@ public class DatabaseContract {
                         + Match.AWAY_GOALS_COL + " TEXT NOT NULL,"
                         + Match.MATCH_ID + " INTEGER NOT NULL,"
                         + Match.MATCH_DAY + " INTEGER NOT NULL,"
+                        + Match.HOME_TEAM_URL + " TEXT NOT NULL,"
+                        + Match.AWAY_TEAM_URL + " TEXT NOT NULL,"
                         + " UNIQUE (" + Match.MATCH_ID + ") ON CONFLICT REPLACE"
                         + " );";
 

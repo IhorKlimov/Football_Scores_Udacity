@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class ScoresDBHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "Scores.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     public ScoresDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

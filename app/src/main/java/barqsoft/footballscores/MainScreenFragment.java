@@ -13,6 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import barqsoft.footballscores.data.DatabaseContract;
+import barqsoft.footballscores.sync.SyncAdapter;
+
+import static barqsoft.footballscores.sync.SyncAdapter.MATCH_PROJECTION;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -36,29 +39,21 @@ public class MainScreenFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              final Bundle savedInstanceState) {
-//        updateScores();
         View rootView = inflater.inflate(R.layout.fragment_page, container, false);
         mScoreList = (RecyclerView) rootView.findViewById(R.id.scores_list);
         mScoreList.setLayoutManager(new LinearLayoutManager(getContext()));
         mAdapter = new ScoresAdapter(getActivity(), null);
         mScoreList.setAdapter(mAdapter);
-//        mScoreList.addOnScrollListener(new ScrollListener(fragmentDate[0], mScoreList));
         getLoaderManager().initLoader(SCORES_LOADER, null, this);
         mAdapter.detailMatchId = MainActivity.sSelectedMatchId;
 
         return rootView;
     }
 
-//    @Override
-//    public void onPause() {
-//        super.onPause();
-//        mScoreList.clearOnScrollListeners();
-//    }
-
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         return new CursorLoader(getActivity(), DatabaseContract.Match.CONTENT_URI,
-                null, null, fragmentDate, null);
+                MATCH_PROJECTION, null, fragmentDate, null);
     }
 
     @Override
@@ -70,6 +65,5 @@ public class MainScreenFragment extends Fragment
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         mAdapter.swapCursor(null);
     }
-
 
 }

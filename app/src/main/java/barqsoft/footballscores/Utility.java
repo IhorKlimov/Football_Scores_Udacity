@@ -1,13 +1,22 @@
 package barqsoft.footballscores;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.os.AsyncTask;
 
-import barqsoft.footballscores.data.DatabaseContract;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+
 import barqsoft.footballscores.data.DatabaseContract.Crest;
 import barqsoft.footballscores.service.FetchService;
-import barqsoft.footballscores.sync.SyncAdapter;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
+import static barqsoft.footballscores.data.DatabaseContract.Crest.COL_TEAM_NAME;
 import static barqsoft.footballscores.sync.SyncAdapter.CREST_PROJECTION;
 
 /**
@@ -15,6 +24,9 @@ import static barqsoft.footballscores.sync.SyncAdapter.CREST_PROJECTION;
  */
 public class Utility {
     public static final int CHAMPIONS_LEAGUE = 362;
+    static OkHttpClient sClient = new OkHttpClient();
+    private static final String CREST_URL = "crestUrl";
+
 
     public static String getLeague(Context context, int league_num) {
         switch (league_num) {
@@ -59,15 +71,12 @@ public class Utility {
         }
     }
 
-    public static String getTeamCrestByTeamName(Context context, String teamName) {
+    public static String getTeamCrestByTeamName(
+            Context context, String teamUrl, String teamName) {
 //        if (teamName == null) {
 //            return R.drawable.no_icon;
 //        }
         switch (teamName) {
-//        This is the set of icons that are currently in the app.
-//         Feel free to find and add more as you go.
-            case "Arsenal London FC":
-                return "";
             case "Manchester United FC":
                 return context.getString(R.string.Manchester_United_FC);
             case "Swansea City":
@@ -127,7 +136,7 @@ public class Utility {
             case "AS Roma":
                 return context.getString(R.string.AS_Roma);
             case "Bor. Mönchengladbach":
-                return context.getString(R.string.Bor__Mönchengladbach);
+                return context.getString(R.string.Bor_Mönchengladbach);
             case "Carpi FC":
                 return context.getString(R.string.Carpi_FC);
             case "VfL Bochum":
@@ -168,20 +177,48 @@ public class Utility {
                 return context.getString(R.string.AFC_Bournemouth);
             case "SC Freiburg":
                 return context.getString(R.string.SC_Freiburg);
-            default:
-                return "";
         }
-//    }
 
-//        Cursor cursor = context.getContentResolver().query(
-//                Crest.CONTENT_URI, CREST_PROJECTION, Crest.COL_TEAM_NAME + "=?", new String[]{teamName}, null);
-//        if (cursor != null && cursor.moveToFirst()) {
-//            if (cursor.getCount() != 0) {
-//                return cursor.getString(1);
-//            }
-//            cursor.close();
-//        }
-//
-//        return "";
+        String res = "";
+        Cursor c = context.getContentResolver().query(
+                Crest.CONTENT_URI, CREST_PROJECTION, COL_TEAM_NAME + "=?", new String[]{teamName}, null);
+        if (c != null && c.moveToFirst()) {
+            if (c.getCount() != 0) {
+                res = c.getString(1);
+            }
+            c.close();
+            return res;
+        }
+
+        return res;
+    }
+
+    public static String getCrestUrl(String teamUrl) {
+        String crest = "";
+
+        String response = null;
+        try {
+            response = Utility.sendGetRequestAndGetResponse(teamUrl);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            crest = new JSONObject(response).getString(CREST_URL);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return crest;
+    }
+
+    public static String sendGetRequestAndGetResponse(String url) throws IOException {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("X-Auth-Token", BuildConfig.FOOTBALL_DATA_API_KEY)
+                .build();
+
+        Response response = sClient.newCall(request).execute();
+
+        return response.body().string();
     }
 }

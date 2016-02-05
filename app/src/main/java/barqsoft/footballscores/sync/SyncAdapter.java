@@ -50,20 +50,24 @@ import java.util.Vector;
 import barqsoft.footballscores.BuildConfig;
 import barqsoft.footballscores.Holder;
 import barqsoft.footballscores.R;
+import barqsoft.footballscores.Utility;
 import barqsoft.footballscores.data.DatabaseContract.Crest;
 import barqsoft.footballscores.data.DatabaseContract.Match;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.provider.BaseColumns._ID;
 import static barqsoft.footballscores.MainActivity.REFRESH_FINISHED;
 import static barqsoft.footballscores.PageAdapter.FULL_FORMAT;
 import static barqsoft.footballscores.PageAdapter.ONE_DAY_IN_MILLIS;
 import static barqsoft.footballscores.data.DatabaseContract.Match.AWAY_COL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.AWAY_GOALS_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.AWAY_TEAM_URL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.DATE_COL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.HOME_COL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.HOME_GOALS_COL;
+import static barqsoft.footballscores.data.DatabaseContract.Match.HOME_TEAM_URL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.LEAGUE_COL;
 import static barqsoft.footballscores.data.DatabaseContract.Match.MATCH_ID;
 import static barqsoft.footballscores.data.DatabaseContract.Match.TIME_COL;
@@ -79,7 +83,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     // Define a variable to contain a content resolver instance
     ContentResolver mContentResolver;
     Context mContext;
-    OkHttpClient client = new OkHttpClient();
 
     private static final int ONE_DAYS_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
     private static final int SYNC_INTERVAL = 24 * 60 * 60;
@@ -115,7 +118,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String AWAY_GOALS = "goalsAwayTeam";
     private static final String MATCH_DAY = "matchday";
     private static final String HREF = "href";
-    private static final String CREST_URL = "crestUrl";
 
     private static final String BASE_URL = "http://api.football-data.org/alpha/fixtures";
     private static final String QUERY_TIME_FRAME = "timeFrame";
@@ -129,6 +131,21 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Crest.COL_CREST_URL
     };
 
+    public static final String[] MATCH_PROJECTION = {
+            Match._ID,
+            Match.DATE_COL,
+            Match.TIME_COL,
+            Match.HOME_COL,
+            Match.AWAY_COL,
+            Match.LEAGUE_COL,
+            Match.HOME_GOALS_COL,
+            Match.AWAY_GOALS_COL,
+            Match.MATCH_ID,
+            Match.MATCH_DAY,
+            Match.HOME_TEAM_URL,
+            Match.AWAY_TEAM_URL
+    };
+
     // Constants
     // The authority for the sync adapter's content provider
     public static final String AUTHORITY = "barqsoft.footballscores";
@@ -140,7 +157,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     Account mAccount;
 
     private SparseArray<Vector<ContentValues>> mFetchData = new SparseArray<>();
-    private ArrayMap<String, String> mTeamUrls = new ArrayMap<>();
 
 
     /**
@@ -276,7 +292,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
         String jsonData = null;
         try {
-            jsonData = sendGetRequestAndGetResponse(uri.toString());
+            jsonData = Utility.sendGetRequestAndGetResponse(uri.toString());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -303,17 +319,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private String sendGetRequestAndGetResponse(String url) throws IOException {
-        Log.d(LOG_TAG, "sendGetRequestAndGetResponse: " + url);
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("X-Auth-Token", BuildConfig.FOOTBALL_DATA_API_KEY)
-                .build();
 
-        Response response = client.newCall(request).execute();
-
-        return response.body().string();
-    }
 
     private void processJsonData(
             String JSONdata, Context mContext, boolean isReal, boolean fromRefresher) {
@@ -393,11 +399,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                 matchDay = matchData.getString(MATCH_DAY);
 
                 ContentValues matchValues = createContentValues(league, date, time, home, away,
-                        homeGoals, awayGoals, matchId, matchDay);
+                        homeGoals, awayGoals, matchId, matchDay, homeTeamUrl, awayTeamUrl);
 
                 values.add(matchValues);
-                mTeamUrls.put(home, homeTeamUrl);
-                mTeamUrls.put(away, awayTeamUrl);
+
             }
 
             saveToDb(values, fromRefresher);
@@ -405,34 +410,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             //Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
-        }
-    }
-
-    private void getCrests() {
-        String crestUrl;
-
-        Cursor cursor = mContentResolver.query(
-                Crest.CONTENT_URI, CREST_PROJECTION, null, null, null);
-
-        for (String teamName : mTeamUrls.keySet()) {
-            if (!hasCrestForTeam(cursor, teamName)) {
-                crestUrl = getCrestUrl(
-                        mTeamUrls.get(teamName));
-
-                ContentValues cv = new ContentValues();
-                cv.put(Crest.COL_TEAM_NAME, teamName);
-                cv.put(Crest.COL_CREST_URL, crestUrl);
-                Log.d(LOG_TAG, "getCrests: " + teamName + " --->>> " + crestUrl);
-                mContentResolver.insert(Crest.CONTENT_URI, cv);
-
-                notifyHolderToGetCrestUrl(teamName);
-            }
-        }
-
-        mTeamUrls.clear();
-
-        if (cursor != null) {
-            cursor.close();
         }
     }
 
@@ -465,7 +442,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private ContentValues createContentValues(int league, String date, String time,
                                               String home, String away, String homeGoals,
                                               String awayGoals, String matchId,
-                                              String matchDay) {
+                                              String matchDay, String homeTeamUrl, String awayTeamUrl) {
         ContentValues matchValues = new ContentValues();
         matchValues.put(MATCH_ID, matchId);
         matchValues.put(DATE_COL, date);
@@ -475,6 +452,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         matchValues.put(HOME_GOALS_COL, homeGoals);
         matchValues.put(AWAY_GOALS_COL, awayGoals);
         matchValues.put(LEAGUE_COL, league);
+        matchValues.put(HOME_TEAM_URL, homeTeamUrl);
+        matchValues.put(AWAY_TEAM_URL, awayTeamUrl);
 //        matchValues.put(HOME_CREST, homeCrest);
 //        matchValues.put(AWAY_CREST, awayCrest);
         matchValues.put(Match.MATCH_DAY, matchDay);
@@ -521,22 +500,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         return res;
     }
 
-    private String getCrestUrl(String teamUrl) {
-        String crest = "";
 
-        String response = null;
-        try {
-            response = sendGetRequestAndGetResponse(teamUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            crest = new JSONObject(response).getString(CREST_URL);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return crest;
-    }
 
 }
