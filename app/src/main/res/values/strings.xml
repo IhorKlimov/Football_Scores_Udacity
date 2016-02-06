@@ -104,5 +104,6 @@
     <string name="Aston_Villa_FC">http://upload.wikimedia.org/wikipedia/de/9/9f/Aston_Villa_logo.svg</string>
     <string name="ACF_Fiorentina">http://upload.wikimedia.org/wikipedia/de/d/de/AC_Florenz.svg</string>
     <string name="SC_Freiburg">http://upload.wikimedia.org/wikipedia/de/f/f1/SC-Freiburg_Logo-neu.svg</string>
+    <string name="today_match">Today\'s Matches</string>
 
 </resources>
