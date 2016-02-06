@@ -15,6 +15,7 @@ public class DatabaseContract {
     public static final String CREST_PATH = "crest";
 
 
+
     public static final class Match implements BaseColumns {
         public static final String TABLE_NAME = "match";
         public static final String LEAGUE_COL = "league";

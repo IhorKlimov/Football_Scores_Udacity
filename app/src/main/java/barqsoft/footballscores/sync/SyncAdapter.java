@@ -26,13 +26,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SyncRequest;
 import android.content.SyncResult;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -47,17 +45,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import barqsoft.footballscores.BuildConfig;
-import barqsoft.footballscores.Holder;
 import barqsoft.footballscores.R;
 import barqsoft.footballscores.Utility;
 import barqsoft.footballscores.data.DatabaseContract.Crest;
 import barqsoft.footballscores.data.DatabaseContract.Match;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
-import static android.provider.BaseColumns._ID;
 import static barqsoft.footballscores.MainActivity.REFRESH_FINISHED;
 import static barqsoft.footballscores.PageAdapter.FULL_FORMAT;
 import static barqsoft.footballscores.PageAdapter.ONE_DAY_IN_MILLIS;
@@ -78,12 +70,8 @@ import static barqsoft.footballscores.data.DatabaseContract.Match.TIME_COL;
  */
 public class SyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String LOG_TAG = "SyncAdapter";
+    public static final String ACTION_DATA_UPDATED = "barqsoft.footballscores.ACTION_DATA_UPDATED";
     private static final String FROM_REFRESHER = "from refresher";
-    // Global variables
-    // Define a variable to contain a content resolver instance
-    ContentResolver mContentResolver;
-    Context mContext;
-
     private static final int ONE_DAYS_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
     private static final int SYNC_INTERVAL = 24 * 60 * 60;
     private static final int FLEX_TIME = SYNC_INTERVAL / 3;
@@ -146,16 +134,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             Match.AWAY_TEAM_URL
     };
 
-    // Constants
-    // The authority for the sync adapter's content provider
-    public static final String AUTHORITY = "barqsoft.footballscores";
-    // An account type, in the form of a domain name
-    public static final String ACCOUNT_TYPE = "example.com";
-    // The account name
-    public static final String ACCOUNT = "dummyaccount";
-    // Instance fields
-    Account mAccount;
-
+    ContentResolver mContentResolver;
+    Context context;
     private SparseArray<Vector<ContentValues>> mFetchData = new SparseArray<>();
 
 
@@ -169,7 +149,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
          * from the incoming Context
          */
         mContentResolver = context.getContentResolver();
-        mContext = context;
+        this.context = context;
     }
 
     /**
@@ -189,25 +169,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-//        long lastUpdate = prefs.getLong(
-//                mContext.getString(R.string.pref_last_update), System.currentTimeMillis());
-//        Log.d("TAG", "onPerformSync: IF " + (System.currentTimeMillis() - lastUpdate));
-//        if (System.currentTimeMillis() - lastUpdate >= ONE_DAYS_IN_MILLISECONDS) {
-//            int delete1 = mContentResolver.delete(MovieByPopularity.CONTENT_URI, null, null);
-//            int delete2 = mContentResolver.delete(MovieByReleaseDate.CONTENT_URI, null, null);
-//            int delete3 = mContentResolver.delete(MovieByVotes.CONTENT_URI, null, null);
-//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete1);
-//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete2);
-//            Log.d("TAG", "onPerformSync: ERASE THE DATABASE -------" + delete3);
-//            prefs.edit().putLong(mContext.getString(R.string.last_update), System.currentTimeMillis()).apply();
-//            Utility.initializePagePreference(mContext);
-//            if (MoviesGridFragment.sListener != null) MoviesGridFragment.sListener.refresh();
-//            syncImmediately(mContext);
-//        } else {
-//            getData();
-//        }
-
         boolean fromRefresher = extras.getBoolean(FROM_REFRESHER, false);
 
         getData("n2", false);
@@ -306,10 +267,10 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
                     //if there is no data, call the function on dummy data
                     //this is expected behavior during the off season.
                     processJsonData(
-                            mContext.getString(R.string.dummy_data),
-                            mContext, false, fromRefresher);
+                            context.getString(R.string.dummy_data),
+                            false, fromRefresher);
                 } else {
-                    processJsonData(jsonData, mContext, true, fromRefresher);
+                    processJsonData(jsonData, true, fromRefresher);
                 }
             } else {
                 Log.d(LOG_TAG, "Could not connect to server.");
@@ -320,9 +281,8 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
 
-
     private void processJsonData(
-            String JSONdata, Context mContext, boolean isReal, boolean fromRefresher) {
+            String JSONdata, boolean isReal, boolean fromRefresher) {
         int league;
         String date;
         String time;
@@ -406,8 +366,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             saveToDb(values, fromRefresher);
-
-            //Log.v(LOG_TAG,"Succesfully Inserted : " + String.valueOf(inserted_data));
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage());
         }
@@ -431,9 +389,7 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
             if (fromRefresher) {
                 notifyMainActivityRefreshFinished();
             }
-
-//            getCrests();
-
+            context.sendBroadcast(new Intent(ACTION_DATA_UPDATED));
             mFetchData.clear();
         }
     }
@@ -454,8 +410,6 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
         matchValues.put(LEAGUE_COL, league);
         matchValues.put(HOME_TEAM_URL, homeTeamUrl);
         matchValues.put(AWAY_TEAM_URL, awayTeamUrl);
-//        matchValues.put(HOME_CREST, homeCrest);
-//        matchValues.put(AWAY_CREST, awayCrest);
         matchValues.put(Match.MATCH_DAY, matchDay);
 
         return matchValues;
@@ -475,31 +429,9 @@ public class SyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void notifyMainActivityRefreshFinished() {
         LocalBroadcastManager
-                .getInstance(mContext)
+                .getInstance(context)
                 .sendBroadcast(
                         new Intent(REFRESH_FINISHED));
     }
-
-    private void notifyHolderToGetCrestUrl(String teamName) {
-        LocalBroadcastManager
-                .getInstance(mContext)
-                .sendBroadcast(
-                        new Intent(Holder.GOT_CREST_URL)
-                                .putExtra(Holder.MESSAGE, teamName));
-    }
-
-    private boolean hasCrestForTeam(Cursor cursor, String teamName) {
-        boolean res = false;
-        while (cursor.moveToNext()) {
-            if (cursor.getString(0).equals(teamName)) {
-                res = true;
-                break;
-            }
-        }
-
-        return res;
-    }
-
-
 
 }

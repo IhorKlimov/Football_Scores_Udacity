@@ -18,15 +18,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.facebook.stetho.Stetho;
-import com.squareup.picasso.Callback;
-import com.squareup.picasso.Picasso;
 
 import barqsoft.footballscores.helpers.AppBarStateChangeListener;
 import barqsoft.footballscores.sync.SyncAdapter;
 
 import static android.view.View.VISIBLE;
-import static java.lang.String.valueOf;
 
 public class MainActivity extends AppCompatActivity
         implements SwipeRefreshLayout.OnRefreshListener {
@@ -61,14 +62,14 @@ public class MainActivity extends AppCompatActivity
         TabLayout tab = (TabLayout) findViewById(R.id.tab);
         tab.setupWithViewPager(mPager);
 
-        setupRefresher();
+//        setupRefresher();
 
-        setupRefreshFinishedReceiver();
+//        setupRefreshFinishedReceiver();
 
         SyncAdapter.initializeSyncAdapter(this);
     }
 
-    @Override
+    /*@Override
     protected void onStop() {
         super.onStop();
         mAppBar.removeOnOffsetChangedListener(mAppBarListener);
@@ -79,7 +80,7 @@ public class MainActivity extends AppCompatActivity
     protected void onDestroy() {
         super.onDestroy();
         mLocalBroadcastManager.unregisterReceiver(mRefreshFinishedReceiver);
-    }
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -114,19 +115,26 @@ public class MainActivity extends AppCompatActivity
     private void loadBackdropImage() {
         ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
         final View scrim = findViewById(R.id.scrim);
-        Picasso.with(this)
+        Glide.with(this)
                 .load("http://p1.pichost.me/i/63/1881032.jpg")
-                .into(backdrop, new Callback() {
+                .listener(new RequestListener<String, GlideDrawable>() {
                     @Override
-                    public void onSuccess() {
+                    public boolean onException(
+                            Exception e, String model, Target<GlideDrawable> target,
+                            boolean isFirstResource) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(GlideDrawable resource,
+                                                   String model, Target<GlideDrawable> target,
+                                                   boolean isFromMemoryCache,
+                                                   boolean isFirstResource) {
                         scrim.setVisibility(VISIBLE);
+                        return false;
                     }
-
-                    @Override
-                    public void onError() {
-
-                    }
-                });
+                })
+                .into(backdrop);
     }
 
     private void setupPager() {
@@ -136,16 +144,16 @@ public class MainActivity extends AppCompatActivity
         mPager.setCurrentItem(sCurrentFragment);
     }
 
-    private void setupRefresher() {
+    /*private void setupRefresher() {
         mRefresher = (SwipeRefreshLayout) findViewById(R.id.refresher);
         mRefresher.setOnRefreshListener(this);
-
 
 
         mAppBarListener = new AppBarStateChangeListener() {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, @State int state) {
                 if (state == EXPANDED) {
+                    Log.d(LOG_TAG, "onStateChanged: EXPANDED");
                     mRefresher.setEnabled(true);
                 } else {
                     mRefresher.setEnabled(false);
@@ -173,6 +181,6 @@ public class MainActivity extends AppCompatActivity
         mLocalBroadcastManager
                 .registerReceiver(
                         mRefreshFinishedReceiver, new IntentFilter(REFRESH_FINISHED));
-    }
+    }*/
 
 }

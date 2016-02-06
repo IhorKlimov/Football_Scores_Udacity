@@ -72,10 +72,7 @@ public class Utility {
     }
 
     public static String getTeamCrestByTeamName(
-            Context context, String teamUrl, String teamName) {
-//        if (teamName == null) {
-//            return R.drawable.no_icon;
-//        }
+            Context context, String teamName) {
         switch (teamName) {
             case "Manchester United FC":
                 return context.getString(R.string.Manchester_United_FC);

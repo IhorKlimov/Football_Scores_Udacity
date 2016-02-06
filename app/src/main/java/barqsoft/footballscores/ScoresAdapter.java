@@ -1,5 +1,6 @@
 package barqsoft.footballscores;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -50,16 +51,17 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
     public static final int COL_HOME_TEAM_URL = 10;
     public static final int COL_AWAY_TEAM_URL = 11;
 
-     Context context;
+    Context context;
     private Cursor mCursor;
     public double detailMatchId = 0;
     private ArrayList<Holder> mHolders = new ArrayList<>();
     private final GenericRequestBuilder<Uri, InputStream, SVG, PictureDrawable> mRequestBuilder;
+    final ContentResolver contentResolver;
 
     public ScoresAdapter(Context context, Cursor cursor) {
         this.context = context;
         mCursor = cursor;
-
+        contentResolver = context.getContentResolver();
         mRequestBuilder = Glide.with(this.context)
                 .using(Glide.buildStreamModelLoader(Uri.class, this.context), InputStream.class)
                 .from(Uri.class)
@@ -71,7 +73,6 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
                 .decoder(new SvgDecoder())
                 .listener(new SvgSoftwareLayerSetter<Uri>());
     }
-
 
     @Override
     public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -112,32 +113,18 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
 
         String homeTeamUrl = mCursor.getString(COL_HOME_TEAM_URL);
         String homeCrest = Utility.getTeamCrestByTeamName(
-                context, homeTeamUrl, homeTeamName);
+                context, homeTeamName);
         loadTeamCrest(homeCrest, holder.homeCrest, homeTeamUrl, homeTeamName);
-
-//        LoadCrest loadHomeCrest = new LoadCrest(holder.homeCrest);
-//        loadHomeCrest.execute(mCursor.getString(COL_HOME_TEAM_URL), mCursor.getString(COL_HOME));
 
         String awayTeamUrl = mCursor.getString(COL_AWAY_TEAM_URL);
         String awayCrest = Utility.getTeamCrestByTeamName(
-                context, awayTeamUrl, awayTeamName);
+                context, awayTeamName);
         loadTeamCrest(awayCrest, holder.awayCrest, awayTeamUrl, awayTeamName);
-//        LoadCrest loadAwayCrest = new LoadCrest(holder.awayCrest);
-//        loadAwayCrest.execute(mCursor.getString(COL_AWAY_TEAM_URL), mCursor.getString(COL_AWAY));
 
 
         holder.leagueData = Utility.getLeague(context, mCursor.getInt(COL_LEAGUE));
         holder.matchDayData = Utility
                 .getMatchDay(context, mCursor.getInt(COL_MATCHDAY), mCursor.getInt(COL_LEAGUE));
-
-//        String s = mCursor.getString(COL_HOME_CREST);
-//        if (!s.equals("")) {
-//            Picasso.with(context).load(s).into(holder.homeCrest);
-//        }
-//        String a = mCursor.getString(COL_AWAY_CREST);
-//        if (!a.equals("")) {
-//            Picasso.with(context).load(a).into(holder.awayCrest);
-//        }
 
         if (holder.match_id == detailMatchId) {
             holder.detailContainer.setVisibility(VISIBLE);
@@ -154,7 +141,6 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
             Log.d(LOG_TAG, "loadTeamCrest: GETTING CREST URL FROM WEB");
             LoadCrest loadHomeCrest = new LoadCrest(view);
             loadHomeCrest.execute(teamUrl, teamName);
-//            Picasso.with(context).load(R.drawable.no_icon).into(view);
         }
     }
 
@@ -197,7 +183,7 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
                 ContentValues cv = new ContentValues();
                 cv.put(DatabaseContract.Crest.COL_TEAM_NAME, params[1]);
                 cv.put(DatabaseContract.Crest.COL_CREST_URL, res);
-                context.getContentResolver().insert(DatabaseContract.Crest.CONTENT_URI, cv);
+                contentResolver.insert(DatabaseContract.Crest.CONTENT_URI, cv);
             }
             return res;
         }

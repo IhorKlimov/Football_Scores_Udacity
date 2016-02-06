@@ -18,6 +18,7 @@ package barqsoft.footballscores.helpers;
 
 import android.support.annotation.IntDef;
 import android.support.design.widget.AppBarLayout;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,7 +29,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Created by Igor Klimov on 2/3/2016.
  */
 public abstract class AppBarStateChangeListener implements AppBarLayout.OnOffsetChangedListener {
-
+    private static final String LOG_TAG = "AppBarStateChange";
     @Retention(SOURCE)
     @IntDef({EXPANDED, COLLAPSED, IDLE})
     public @interface State {
@@ -45,6 +46,7 @@ public abstract class AppBarStateChangeListener implements AppBarLayout.OnOffset
 
     @Override
     public final void onOffsetChanged(AppBarLayout appBarLayout, int i) {
+        Log.d(LOG_TAG, "onOffsetChanged: ");
         if (i == 0) {
             if (mCurrentState != EXPANDED) {
                 onStateChanged(appBarLayout, EXPANDED);
