@@ -1,9 +1,7 @@
 package barqsoft.footballscores;
 
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.TabLayout;
@@ -12,17 +10,14 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.target.Target;
 import com.facebook.stetho.Stetho;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.Picasso;
 
 import barqsoft.footballscores.helpers.AppBarStateChangeListener;
 import barqsoft.footballscores.sync.SyncAdapter;
@@ -96,6 +91,9 @@ public class MainActivity extends AppCompatActivity
             Intent about = new Intent(this, AboutActivity.class);
             startActivity(about);
             return true;
+        } else if (id == R.id.action_refresh) {
+            SyncAdapter.syncImmediately(this);
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -115,26 +113,19 @@ public class MainActivity extends AppCompatActivity
     private void loadBackdropImage() {
         ImageView backdrop = (ImageView) findViewById(R.id.backdrop);
         final View scrim = findViewById(R.id.scrim);
-        Glide.with(this)
+        Picasso.with(this)
                 .load("http://p1.pichost.me/i/63/1881032.jpg")
-                .listener(new RequestListener<String, GlideDrawable>() {
+                .into(backdrop, new Callback() {
                     @Override
-                    public boolean onException(
-                            Exception e, String model, Target<GlideDrawable> target,
-                            boolean isFirstResource) {
-                        return false;
+                    public void onSuccess() {
+                        scrim.setVisibility(VISIBLE);
                     }
 
                     @Override
-                    public boolean onResourceReady(GlideDrawable resource,
-                                                   String model, Target<GlideDrawable> target,
-                                                   boolean isFromMemoryCache,
-                                                   boolean isFirstResource) {
-                        scrim.setVisibility(VISIBLE);
-                        return false;
+                    public void onError() {
+
                     }
-                })
-                .into(backdrop);
+                });
     }
 
     private void setupPager() {

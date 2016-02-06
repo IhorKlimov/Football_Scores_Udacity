@@ -16,13 +16,10 @@
 
 package barqsoft.footballscores.widget;
 
-import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
@@ -30,18 +27,18 @@ import android.widget.RemoteViewsService;
 import java.util.Calendar;
 import java.util.Date;
 
-import barqsoft.footballscores.MainActivity;
 import barqsoft.footballscores.PageAdapter;
 import barqsoft.footballscores.R;
+import barqsoft.footballscores.ScoresAdapter;
 import barqsoft.footballscores.Utility;
-import barqsoft.footballscores.data.DatabaseContract;
 import barqsoft.footballscores.data.DatabaseContract.Match;
-import barqsoft.footballscores.sync.SyncAdapter;
 
 import static barqsoft.footballscores.ScoresAdapter.COL_AWAY;
 import static barqsoft.footballscores.ScoresAdapter.COL_AWAY_GOALS;
+import static barqsoft.footballscores.ScoresAdapter.COL_AWAY_TEAM_URL;
 import static barqsoft.footballscores.ScoresAdapter.COL_HOME;
 import static barqsoft.footballscores.ScoresAdapter.COL_HOME_GOALS;
+import static barqsoft.footballscores.ScoresAdapter.COL_HOME_TEAM_URL;
 import static barqsoft.footballscores.sync.SyncAdapter.MATCH_PROJECTION;
 
 /**
@@ -50,20 +47,20 @@ import static barqsoft.footballscores.sync.SyncAdapter.MATCH_PROJECTION;
 public class Factory implements RemoteViewsService.RemoteViewsFactory {
     private static final String LOG_TAG = "Factory";
     private static final String TAG = "Factory";
-    private Context mContext;
+    Context context;
     private int mWidgetId;
     private Cursor mCursor;
 
     public Factory(Context context, Intent intent) {
         Log.d(LOG_TAG, "Factory: ");
-        mContext = context;
+        this.context = context;
         mWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
 
         Calendar c = Calendar.getInstance();
         String today =
                 PageAdapter.FULL_FORMAT.format(new Date(c.getTimeInMillis()));
-        mCursor = mContext.getContentResolver().query(
+        mCursor = this.context.getContentResolver().query(
                 Match.CONTENT_URI, MATCH_PROJECTION, null, new String[]{today}, null);
     }
 
@@ -91,29 +88,23 @@ public class Factory implements RemoteViewsService.RemoteViewsFactory {
 
     @Override
     public RemoteViews getViewAt(int position) {
-        RemoteViews v = new RemoteViews(mContext.getPackageName(), R.layout.widget_item);
+        RemoteViews v = new RemoteViews(context.getPackageName(), R.layout.widget_item);
 
         String homeTeamName = "";
         String awayTeamName = "";
         String score = "";
         String time = "";
+        int homeCrest = R.drawable.no_icon;
+        int awayCrest = R.drawable.no_icon;
 
         if (mCursor != null && mCursor.moveToPosition(position)) {
-            Log.d(LOG_TAG, "getViewAt: ---------------------------------------------------");
             homeTeamName = mCursor.getString(COL_HOME);
             awayTeamName = mCursor.getString(COL_AWAY);
             score = Utility.getScores(
                     mCursor.getInt(COL_HOME_GOALS), mCursor.getInt(COL_AWAY_GOALS));
             time = mCursor.getString(2);
-
-
-//            String homeCrest = Utility.getTeamCrestByTeamName(
-//                    context, homeTeamName);
-//            loadTeamCrest(homeCrest, holder.homeCrest, homeTeamUrl, homeTeamName);
-
-//            String awayCrest = Utility.getTeamCrestByTeamName(
-//                    context, awayTeamName);
-//            loadTeamCrest(awayCrest, holder.awayCrest, awayTeamUrl, awayTeamName);
+            homeCrest = Utility.getTeamCrestByTeamName(homeTeamName);
+            awayCrest = Utility.getTeamCrestByTeamName(awayTeamName);
 
         }
 
@@ -121,7 +112,8 @@ public class Factory implements RemoteViewsService.RemoteViewsFactory {
         v.setTextViewText(R.id.away_name, awayTeamName);
         v.setTextViewText(R.id.score_textview, score);
         v.setTextViewText(R.id.data_textview, time);
-
+        v.setImageViewResource(R.id.home_crest, homeCrest);
+        v.setImageViewResource(R.id.away_crest, awayCrest);
 
         v.setOnClickFillInIntent(R.id.widget_list_item, new Intent());
 

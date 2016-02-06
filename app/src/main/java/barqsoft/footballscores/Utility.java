@@ -1,31 +1,23 @@
 package barqsoft.footballscores;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.os.AsyncTask;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 
-import barqsoft.footballscores.data.DatabaseContract.Crest;
 import barqsoft.footballscores.service.FetchService;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-import static barqsoft.footballscores.data.DatabaseContract.Crest.COL_TEAM_NAME;
-import static barqsoft.footballscores.sync.SyncAdapter.CREST_PROJECTION;
-
 /**
  * Created by yehya khaled on 3/3/2015.
  */
 public class Utility {
+    private static final String LOG_TAG = "Utility";
     public static final int CHAMPIONS_LEAGUE = 362;
     static OkHttpClient sClient = new OkHttpClient();
     private static final String CREST_URL = "crestUrl";
+
 
 
     public static String getLeague(Context context, int league_num) {
@@ -71,141 +63,65 @@ public class Utility {
         }
     }
 
-    public static String getTeamCrestByTeamName(
-            Context context, String teamName) {
+    public static int getTeamCrestByTeamName(String teamName) {
         switch (teamName) {
+            case "Arsenal London FC":
+                return R.drawable.arsenal;
             case "Manchester United FC":
-                return context.getString(R.string.Manchester_United_FC);
+                return R.drawable.manchester_united;
             case "Swansea City":
-                return context.getString(R.string.Swansea_City_FC);
+                return R.drawable.swansea_city_afc;
             case "Leicester City":
-                return context.getString(R.string.Leicester_City_FC);
+                return R.drawable.leicester_city_fc_hd_logo;
             case "Everton FC":
-                return context.getString(R.string.Everton_FC);
+                return R.drawable.everton_fc_logo1;
             case "West Ham United FC":
-                return context.getString(R.string.West_Ham_United_FC);
+                return R.drawable.west_ham;
             case "Tottenham Hotspur FC":
-                return context.getString(R.string.Tottenham_Hotspur_FC);
+                return R.drawable.tottenham_hotspur;
             case "West Bromwich Albion":
-                return context.getString(R.string.West_Bromwich_Albion_FC);
+                return R.drawable.west_bromwich_albion_hd_logo;
             case "Sunderland AFC":
-                return context.getString(R.string.Sunderland_AFC);
-            case "Crystal Palace FC":
-                return context.getString(R.string.Crystal_Palace_FC);
+                return R.drawable.sunderland;
             case "Stoke City FC":
-                return context.getString(R.string.Stoke_City_FC);
+                return R.drawable.stoke_city;
+            case "Crystal Palace FC":
+                return R.drawable.crystal_palace_fc;
             case "1. FC Union Berlin":
-                return context.getString(R.string.one_FC_Union_Berlin);
+                return R.drawable.one_fc_union_berlin;
             case "Genoa CFC":
-                return context.getString(R.string.Genoa_CFC);
+                return R.drawable.genoa_cfc;
             case "US Sassuolo Calcio":
-                return context.getString(R.string.US_Sassuolo_Calcio);
+                return R.drawable.us_sassuolo_calcio;
             case "West Bromwich Albion FC":
-                return context.getString(R.string.West_Bromwich_Albion_FC);
+                return R.drawable.us_sassuolo_calcio;
             case "Frosinone Calcio":
-                return context.getString(R.string.Frosinone_Calcio);
+                return R.drawable.frosinonestemma;
             case "AC Chievo Verona":
-                return context.getString(R.string.AC_Chievo_Verona);
+                return R.drawable.ac_chievo_verona;
             case "SSC Napoli":
-                return context.getString(R.string.SSC_Napoli);
+                return R.drawable.ssc_napoli_logo;
             case "Liverpool FC":
-                return context.getString(R.string.Liverpool_FC);
+                return R.drawable.fc_liverpool;
             case "Getafe CF":
-                return context.getString(R.string.Getafe_CF);
+                return R.drawable.getafe_cf;
             case "Bologna FC":
-                return context.getString(R.string.Bologna_FC);
+                return R.drawable.fc_bologna;
             case "Werder Bremen":
-                return context.getString(R.string.Werder_Bremen);
-            case "UC Sampdoria":
-                return context.getString(R.string.UC_Sampdoria);
+                return R.drawable.sv_werder_bremen_logo;
             case "Swansea City FC":
-                return context.getString(R.string.Swansea_City_FC);
+                return R.drawable.swansea_city_afc;
             case "1. FC Kaiserslautern":
-                return context.getString(R.string.one_FC_Kaiserslautern);
-            case "Málaga CF":
-                return context.getString(R.string.Málaga_CF);
+                return R.drawable.logo_on1_fc_kaiserslautern;
             case "SV Sandhausen":
-                return context.getString(R.string.SV_Sandhausen);
-            case "FC Internazionale Milano":
-                return context.getString(R.string.FC_Internazionale_Milano);
+                return R.drawable.sv_sandhausen;
             case "Torino FC":
-                return context.getString(R.string.Torino_FC);
+                return R.drawable.torino_fc_logo;
             case "AS Roma":
-                return context.getString(R.string.AS_Roma);
-            case "Bor. Mönchengladbach":
-                return context.getString(R.string.Bor_Mönchengladbach);
-            case "Carpi FC":
-                return context.getString(R.string.Carpi_FC);
-            case "VfL Bochum":
-                return context.getString(R.string.VfL_Bochum);
-            case "SS Lazio":
-                return context.getString(R.string.SS_Lazio);
-            case "SC Paderborn 07":
-                return context.getString(R.string.SC_Paderborn_07);
-            case "Empoli FC":
-                return context.getString(R.string.Empoli_FC);
-            case "Manchester City FC":
-                return context.getString(R.string.Manchester_City_FC);
-            case "Watford FC":
-                return context.getString(R.string.Watford_FC);
-            case "Leicester City FC":
-                return context.getString(R.string.Leicester_City_FC);
-            case "Juventus Turin":
-                return context.getString(R.string.Juventus_Turin);
-            case "US Cittá di Palermo":
-                return context.getString(R.string.US_Cittá_di_Palermo);
-            case "Southampton FC":
-                return context.getString(R.string.Southampton_FC);
-            case "Hellas Verona FC":
-                return context.getString(R.string.Hellas_Verona_FC);
-            case "Chelsea FC":
-                return context.getString(R.string.Chelsea_FC);
-            case "Atalanta BC":
-                return context.getString(R.string.Atalanta_BC);
-            case "Arsenal FC":
-                return context.getString(R.string.Arsenal_FC);
-            case "Udinese Calcio":
-                return context.getString(R.string.Udinese_Calcio);
-            case "Aston Villa FC":
-                return context.getString(R.string.Aston_Villa_FC);
-            case "ACF Fiorentina":
-                return context.getString(R.string.ACF_Fiorentina);
-            case "AFC Bournemouth":
-                return context.getString(R.string.AFC_Bournemouth);
-            case "SC Freiburg":
-                return context.getString(R.string.SC_Freiburg);
+                return R.drawable.as_rom;
+            default:
+                return R.drawable.no_icon;
         }
-
-        String res = "";
-        Cursor c = context.getContentResolver().query(
-                Crest.CONTENT_URI, CREST_PROJECTION, COL_TEAM_NAME + "=?", new String[]{teamName}, null);
-        if (c != null && c.moveToFirst()) {
-            if (c.getCount() != 0) {
-                res = c.getString(1);
-            }
-            c.close();
-            return res;
-        }
-
-        return res;
-    }
-
-    public static String getCrestUrl(String teamUrl) {
-        String crest = "";
-
-        String response = null;
-        try {
-            response = Utility.sendGetRequestAndGetResponse(teamUrl);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            crest = new JSONObject(response).getString(CREST_URL);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        return crest;
     }
 
     public static String sendGetRequestAndGetResponse(String url) throws IOException {
@@ -218,4 +134,5 @@ public class Utility {
 
         return response.body().string();
     }
+
 }

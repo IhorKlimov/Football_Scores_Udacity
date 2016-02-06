@@ -1,37 +1,18 @@
 package barqsoft.footballscores;
 
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.drawable.PictureDrawable;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 
-import com.bumptech.glide.GenericRequestBuilder;
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.model.StreamEncoder;
-import com.bumptech.glide.load.resource.file.FileToStreamDecoder;
-import com.caverock.androidsvg.SVG;
-
-import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-
-import barqsoft.footballscores.data.DatabaseContract;
-import barqsoft.footballscores.svg.SvgDecoder;
-import barqsoft.footballscores.svg.SvgDrawableTranscoder;
-import barqsoft.footballscores.svg.SvgSoftwareLayerSetter;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
-import static com.bumptech.glide.load.engine.DiskCacheStrategy.SOURCE;
 
 /**
  * Created by yehya khaled on 2/26/2015.
@@ -55,23 +36,12 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
     private Cursor mCursor;
     public double detailMatchId = 0;
     private ArrayList<Holder> mHolders = new ArrayList<>();
-    private final GenericRequestBuilder<Uri, InputStream, SVG, PictureDrawable> mRequestBuilder;
     final ContentResolver contentResolver;
 
     public ScoresAdapter(Context context, Cursor cursor) {
         this.context = context;
         mCursor = cursor;
         contentResolver = context.getContentResolver();
-        mRequestBuilder = Glide.with(this.context)
-                .using(Glide.buildStreamModelLoader(Uri.class, this.context), InputStream.class)
-                .from(Uri.class)
-                .as(SVG.class)
-                .transcode(new SvgDrawableTranscoder(), PictureDrawable.class)
-                .sourceEncoder(new StreamEncoder())
-                .diskCacheStrategy(SOURCE)
-                .cacheDecoder(new FileToStreamDecoder<>(new SvgDecoder()))
-                .decoder(new SvgDecoder())
-                .listener(new SvgSoftwareLayerSetter<Uri>());
     }
 
     @Override
@@ -111,16 +81,11 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
         holder.match_id = mCursor.getDouble(COL_ID);
 
 
-        String homeTeamUrl = mCursor.getString(COL_HOME_TEAM_URL);
-        String homeCrest = Utility.getTeamCrestByTeamName(
-                context, homeTeamName);
-        loadTeamCrest(homeCrest, holder.homeCrest, homeTeamUrl, homeTeamName);
+        int homeCrest = Utility.getTeamCrestByTeamName(homeTeamName);
+        holder.homeCrest.setImageResource(homeCrest);
 
-        String awayTeamUrl = mCursor.getString(COL_AWAY_TEAM_URL);
-        String awayCrest = Utility.getTeamCrestByTeamName(
-                context, awayTeamName);
-        loadTeamCrest(awayCrest, holder.awayCrest, awayTeamUrl, awayTeamName);
-
+        int awayCrest = Utility.getTeamCrestByTeamName(awayTeamName);
+        holder.awayCrest.setImageResource(awayCrest);
 
         holder.leagueData = Utility.getLeague(context, mCursor.getInt(COL_LEAGUE));
         holder.matchDayData = Utility
@@ -131,24 +96,6 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
             setupDetails(holder);
         } else {
             holder.detailContainer.setVisibility(GONE);
-        }
-    }
-
-    private void loadTeamCrest(String crest, ImageView view, String teamUrl, String teamName) {
-        if (!crest.equals("")) {
-            setImage(crest, view);
-        } else {
-            Log.d(LOG_TAG, "loadTeamCrest: GETTING CREST URL FROM WEB");
-            LoadCrest loadHomeCrest = new LoadCrest(view);
-            loadHomeCrest.execute(teamUrl, teamName);
-        }
-    }
-
-    private void setImage(String crest, ImageView view) {
-        if (crest.endsWith("svg")) {
-            mRequestBuilder.load(Uri.parse(crest)).into(view);
-        } else {
-            Glide.with(context).load(crest).into(view);
         }
     }
 
@@ -167,33 +114,6 @@ public class ScoresAdapter extends RecyclerView.Adapter<Holder> {
         Log.d(LOG_TAG, "swapCursor: ");
         mCursor = cursor;
         notifyDataSetChanged();
-    }
-
-    private class LoadCrest extends AsyncTask<String, Void, String> {
-        private final WeakReference<ImageView> reference;
-
-        public LoadCrest(ImageView view) {
-            reference = new WeakReference<>(view);
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            String res = Utility.getCrestUrl(params[0]);
-            if (res != null && !res.equals("")) {
-                ContentValues cv = new ContentValues();
-                cv.put(DatabaseContract.Crest.COL_TEAM_NAME, params[1]);
-                cv.put(DatabaseContract.Crest.COL_CREST_URL, res);
-                contentResolver.insert(DatabaseContract.Crest.CONTENT_URI, cv);
-            }
-            return res;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-            ImageView view = reference.get();
-            setImage(s, view);
-        }
     }
 
 }

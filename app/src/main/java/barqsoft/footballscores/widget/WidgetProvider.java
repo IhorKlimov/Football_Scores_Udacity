@@ -55,15 +55,15 @@ public class WidgetProvider extends AppWidgetProvider {
             rv.setRemoteAdapter(R.id.widget_list, intent);
 
             // Create an Intent to launch MainActivity
-//            Intent launchIntent = new Intent(context, MainActivity.class);
-//            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, 0);
-//            rv.setOnClickPendingIntent(R.id.widget_header, pendingIntent);
+            Intent launchIntent = new Intent(context, MainActivity.class);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, 0);
+            rv.setOnClickPendingIntent(R.id.widget, pendingIntent);
 
-            Intent clickIntent = new Intent(context,MainActivity.class);
-            PendingIntent pi = TaskStackBuilder.create(context)
-                    .addNextIntentWithParentStack(clickIntent)
-                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-            rv.setPendingIntentTemplate(R.id.widget_list, pi);
+//            Intent clickIntent = new Intent(context,MainActivity.class);
+//            PendingIntent pi = TaskStackBuilder.create(context)
+//                    .addNextIntentWithParentStack(clickIntent)
+//                    .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+//            rv.setPendingIntentTemplate(R.id.widget_list, pi);
 
             appWidgetManager.updateAppWidget(appWidgetIds[i], rv);
         }
